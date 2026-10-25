@@ -6,11 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserService.Repositories.Migrations
 {
     /// <inheritdoc />
-    public partial class AddUserIdentitySchema : Migration
+    public partial class AddUserIdentityAndSheetFeatures : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "BlockedUsers",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BlockerUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BlockedTargetUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    CreatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlockedUsers", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
@@ -63,6 +78,7 @@ namespace UserService.Repositories.Migrations
                     DisplayName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     AvatarUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false, defaultValue: "https://cdn.falumni.local/avatars/default.jpg"),
                     StudentCode = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    Campus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "HCM"),
                     GraduationYear = table.Column<int>(type: "int", nullable: true),
                     Major = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     CurrentCompany = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
@@ -72,6 +88,11 @@ namespace UserService.Repositories.Migrations
                     LinkedInUrl = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     GitHubUrl = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    GoogleCalendarUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ShowEmailPublicly = table.Column<bool>(type: "bit", nullable: false),
+                    ShowPhonePublicly = table.Column<bool>(type: "bit", nullable: false),
+                    ShowCompanyPublicly = table.Column<bool>(type: "bit", nullable: false),
+                    ShowCalendarPublicly = table.Column<bool>(type: "bit", nullable: false),
                     UpdatedAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -109,6 +130,12 @@ namespace UserService.Repositories.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_BlockedUsers_BlockerUserId_BlockedTargetUserId",
+                table: "BlockedUsers",
+                columns: new[] { "BlockerUserId", "BlockedTargetUserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_Token",
                 table: "RefreshTokens",
                 column: "Token",
@@ -140,6 +167,9 @@ namespace UserService.Repositories.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "BlockedUsers");
+
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
 

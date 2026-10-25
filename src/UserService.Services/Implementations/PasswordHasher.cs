@@ -57,13 +57,18 @@ public static class PasswordHasher
 
 public static class UserMappingExtensions
 {
-    public static UserProfileResponse ToResponse(this User user)
+    public static UserProfileResponse ToResponse(this User user, bool applyPublicPrivacyMask = false)
     {
         var p = user.Profile;
+        var showEmail = p?.ShowEmailPublicly ?? true;
+        var showPhone = p?.ShowPhonePublicly ?? false;
+        var showCompany = p?.ShowCompanyPublicly ?? true;
+        var showCalendar = p?.ShowCalendarPublicly ?? true;
+
         return new UserProfileResponse
         {
             Id = user.Id,
-            Email = user.Email,
+            Email = (!applyPublicPrivacyMask || showEmail) ? user.Email : string.Empty,
             FullName = user.FullName,
             DisplayName = !string.IsNullOrWhiteSpace(p?.DisplayName) ? p.DisplayName : user.FullName,
             AvatarUrl = !string.IsNullOrWhiteSpace(p?.AvatarUrl) ? p.AvatarUrl : "https://cdn.falumni.local/avatars/default.jpg",
@@ -72,15 +77,21 @@ public static class UserMappingExtensions
             Status = user.Status,
             EmailVerified = user.EmailVerified,
             StudentCode = p?.StudentCode ?? string.Empty,
+            Campus = !string.IsNullOrWhiteSpace(p?.Campus) ? p.Campus : "HCM",
             GraduationYear = p?.GraduationYear,
             Major = p?.Major ?? string.Empty,
-            CurrentCompany = p?.CurrentCompany ?? string.Empty,
-            JobTitle = p?.JobTitle ?? string.Empty,
+            CurrentCompany = (!applyPublicPrivacyMask || showCompany) ? (p?.CurrentCompany ?? string.Empty) : string.Empty,
+            JobTitle = (!applyPublicPrivacyMask || showCompany) ? (p?.JobTitle ?? string.Empty) : string.Empty,
             Bio = p?.Bio ?? string.Empty,
             Skills = p?.Skills ?? string.Empty,
             LinkedInUrl = p?.LinkedInUrl ?? string.Empty,
             GitHubUrl = p?.GitHubUrl ?? string.Empty,
-            PhoneNumber = p?.PhoneNumber ?? string.Empty,
+            PhoneNumber = (!applyPublicPrivacyMask || showPhone) ? (p?.PhoneNumber ?? string.Empty) : string.Empty,
+            GoogleCalendarUrl = (!applyPublicPrivacyMask || showCalendar) ? (p?.GoogleCalendarUrl ?? string.Empty) : string.Empty,
+            ShowEmailPublicly = showEmail,
+            ShowPhonePublicly = showPhone,
+            ShowCompanyPublicly = showCompany,
+            ShowCalendarPublicly = showCalendar,
             CreatedAtUtc = user.CreatedAtUtc,
             UpdatedAtUtc = user.UpdatedAtUtc
         };

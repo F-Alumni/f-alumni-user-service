@@ -54,6 +54,7 @@ public class AuthService : IAuthService
 
         var userId = Guid.NewGuid();
         var accountType = string.IsNullOrWhiteSpace(request.AccountType) ? "Alumni" : request.AccountType.Trim();
+        var campus = string.IsNullOrWhiteSpace(request.Campus) ? "HCM" : request.Campus.Trim();
         var user = new User
         {
             Id = userId,
@@ -73,6 +74,7 @@ public class AuthService : IAuthService
                 DisplayName = request.FullName.Trim(),
                 AvatarUrl = "https://cdn.falumni.local/avatars/default.jpg",
                 StudentCode = request.StudentCode.Trim(),
+                Campus = campus,
                 GraduationYear = request.GraduationYear,
                 Major = request.Major.Trim(),
                 UpdatedAtUtc = DateTime.UtcNow
@@ -181,6 +183,95 @@ public class AuthService : IAuthService
         return await GenerateAuthTokensAsync(user, cancellationToken);
     }
 
+    public async Task<AuthTokenResponse> GoogleLoginAsync(GoogleLoginRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var email = request.Email?.Trim().ToLowerInvariant() ?? string.Empty;
+        var fullName = request.FullName?.Trim() ?? string.Empty;
+        var avatarUrl = request.AvatarUrl?.Trim() ?? string.Empty;
+
+        // If IdToken is a JWT, extract email/name claims when not explicitly passed
+        if (!string.IsNullOrWhiteSpace(request.IdToken))
+        {
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                if (handler.CanReadToken(request.IdToken))
+                {
+                    var jwt = handler.ReadJwtToken(request.IdToken);
+                    if (string.IsNullOrWhiteSpace(email))
+                    {
+                        email = (jwt.Claims.FirstOrDefault(c => c.Type == "email")?.Value ?? string.Empty).ToLowerInvariant();
+                    }
+                    if (string.IsNullOrWhiteSpace(fullName))
+                    {
+                        fullName = jwt.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? string.Empty;
+                    }
+                    if (string.IsNullOrWhiteSpace(avatarUrl))
+                    {
+                        avatarUrl = jwt.Claims.FirstOrDefault(c => c.Type == "picture")?.Value ?? string.Empty;
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback to request properties
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new ArgumentException("Google login requires a valid email or Google ID Token.");
+        }
+
+        var user = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (user is null)
+        {
+            var userId = Guid.NewGuid();
+            var resolvedName = string.IsNullOrWhiteSpace(fullName) ? email.Split('@')[0] : fullName;
+            user = new User
+            {
+                Id = userId,
+                Email = email,
+                PasswordHash = PasswordHasher.HashPassword(Guid.NewGuid().ToString("N")),
+                FullName = resolvedName,
+                Role = "USER",
+                AccountType = "Alumni",
+                Status = "Active",
+                EmailVerified = true,
+                CreatedAtUtc = DateTime.UtcNow,
+                UpdatedAtUtc = DateTime.UtcNow,
+                Profile = new UserProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    DisplayName = resolvedName,
+                    AvatarUrl = string.IsNullOrWhiteSpace(avatarUrl)
+                        ? "https://cdn.falumni.local/avatars/default.jpg"
+                        : avatarUrl,
+                    Campus = string.IsNullOrWhiteSpace(request.Campus) ? "HCM" : request.Campus.Trim(),
+                    UpdatedAtUtc = DateTime.UtcNow
+                }
+            };
+
+            await _userRepository.CreateAsync(user, cancellationToken);
+            _logger.LogInformation("Created new user {UserId} ({Email}) via Google SSO.", user.Id, user.Email);
+        }
+        else if (user.Status.Equals("Suspended", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ForbiddenException("Account has been suspended.");
+        }
+        else if (user.Status.Equals("PendingVerification", StringComparison.OrdinalIgnoreCase))
+        {
+            user.Status = "Active";
+            user.EmailVerified = true;
+            await _userRepository.UpdateAsync(user, cancellationToken);
+        }
+
+        return await GenerateAuthTokensAsync(user, cancellationToken);
+    }
+
     public async Task<AuthTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -200,6 +291,41 @@ public class AuthService : IAuthService
         await _userRepository.RevokeRefreshTokenAsync(storedToken, cancellationToken);
 
         return await GenerateAuthTokensAsync(user, cancellationToken);
+    }
+
+    public async Task LogoutAsync(Guid userId, LogoutRequest? request, CancellationToken cancellationToken = default)
+    {
+        if (!string.IsNullOrWhiteSpace(request?.RefreshToken))
+        {
+            var token = await _userRepository.GetRefreshTokenAsync(request.RefreshToken.Trim(), cancellationToken);
+            if (token is not null && token.UserId == userId)
+            {
+                await _userRepository.RevokeRefreshTokenAsync(token, cancellationToken);
+                return;
+            }
+        }
+
+        await _userRepository.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+        _logger.LogInformation("User {UserId} logged out and revoked refresh tokens.", userId);
+    }
+
+    public async Task ChangePasswordAsync(Guid userId, ChangePasswordRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userId);
+
+        if (!PasswordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
+        {
+            throw new ArgumentException("Current password is incorrect.");
+        }
+
+        user.PasswordHash = PasswordHasher.HashPassword(request.NewPassword);
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        await _userRepository.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
+
+        _logger.LogInformation("Changed password for user {UserId}", userId);
     }
 
     public async Task<RegisterResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)

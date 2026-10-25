@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserService.Services.DTOs.Requests;
@@ -19,7 +20,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-01: Register a new FPT Alumni / Student account.
+    /// Register a new FPT Alumni / Student account.
     /// </summary>
     [HttpPost("register")]
     [AllowAnonymous]
@@ -35,7 +36,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-02: Verify email address using 6-digit OTP code and receive JWT tokens.
+    /// US-03 (Sheet) / US-02 (Guideline): Verify email address using 6-digit OTP code.
     /// </summary>
     [HttpPost("verify-email")]
     [AllowAnonymous]
@@ -51,7 +52,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-03: Authenticate with Email and Password to receive JWT Access Token and Refresh Token.
+    /// US-01 (Sheet) / US-03 (Guideline): Login with Email and Password.
     /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
@@ -67,7 +68,22 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-11: Exchange a valid Refresh Token for a new JWT Access Token and Refresh Token.
+    /// US-02 (Sheet): Login with Google OAuth / ID Token.
+    /// </summary>
+    [HttpPost("google")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(AuthTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AuthTokenResponse>> GoogleLogin(
+        [FromBody] GoogleLoginRequest request,
+        CancellationToken cancellationToken)
+    {
+        var result = await _authService.GoogleLoginAsync(request, cancellationToken);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Exchange a valid Refresh Token for a new JWT Access Token and Refresh Token.
     /// </summary>
     [HttpPost("refresh-token")]
     [AllowAnonymous]
@@ -82,7 +98,47 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-04 (Step 1): Request password reset OTP code.
+    /// US-08 (Sheet): Logout and revoke active refresh token(s).
+    /// </summary>
+    [HttpPost("logout")]
+    [Authorize(Policy = "RequireUserRole")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout(
+        [FromBody] LogoutRequest? request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        await _authService.LogoutAsync(userId, request, cancellationToken);
+        return Ok(new { message = "Logged out successfully." });
+    }
+
+    /// <summary>
+    /// US-07 (Sheet): Change password for authenticated user.
+    /// </summary>
+    [HttpPost("change-password")]
+    [Authorize(Policy = "RequireUserRole")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangePasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var userId))
+        {
+            return Unauthorized();
+        }
+
+        await _authService.ChangePasswordAsync(userId, request, cancellationToken);
+        return Ok(new { message = "Password changed successfully." });
+    }
+
+    /// <summary>
+    /// US-07 (Sheet): Request password reset OTP code.
     /// </summary>
     [HttpPost("forgot-password")]
     [AllowAnonymous]
@@ -97,7 +153,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// US-04 (Step 2): Reset password using OTP code.
+    /// US-07 (Sheet): Reset password using OTP code.
     /// </summary>
     [HttpPost("reset-password")]
     [AllowAnonymous]
@@ -109,5 +165,12 @@ public class AuthController : ControllerBase
     {
         await _authService.ResetPasswordAsync(request, cancellationToken);
         return Ok(new { message = "Password has been reset successfully." });
+    }
+
+    private bool TryGetCurrentUserId(out Guid userId)
+    {
+        var claimVal = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                    ?? User.FindFirst("sub")?.Value;
+        return Guid.TryParse(claimVal, out userId);
     }
 }

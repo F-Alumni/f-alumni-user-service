@@ -37,7 +37,7 @@ public class UserProfileGrpcService : Contracts.Grpc.UserProfile.V1.UserProfileS
 
         try
         {
-            var profile = await _userProfileService.GetByIdAsync(userGuid, context.CancellationToken);
+            var profile = await _userProfileService.GetByIdAsync(userGuid, isOwnerOrAdmin: false, context.CancellationToken);
 
             var statusLabel = profile.Status.Equals("Suspended", StringComparison.OrdinalIgnoreCase)
                 ? "Suspended"

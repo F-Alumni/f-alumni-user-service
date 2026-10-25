@@ -50,6 +50,7 @@ public class UserRepository : IUserRepository
 
     public async Task<(IReadOnlyList<User> Items, int TotalCount)> GetDirectoryPagedAsync(
         string? search,
+        string? campus,
         int? graduationYear,
         string? major,
         string? company,
@@ -73,9 +74,16 @@ public class UserRepository : IUserRepository
                 (u.Profile != null && (
                     u.Profile.DisplayName.ToLower().Contains(term) ||
                     u.Profile.StudentCode.ToLower().Contains(term) ||
+                    u.Profile.Campus.ToLower().Contains(term) ||
                     u.Profile.Skills.ToLower().Contains(term) ||
                     u.Profile.CurrentCompany.ToLower().Contains(term) ||
                     u.Profile.Major.ToLower().Contains(term))));
+        }
+
+        if (!string.IsNullOrWhiteSpace(campus))
+        {
+            var cp = campus.Trim().ToLowerInvariant();
+            query = query.Where(u => u.Profile != null && u.Profile.Campus.ToLower() == cp);
         }
 
         if (graduationYear.HasValue)
@@ -185,5 +193,53 @@ public class UserRepository : IUserRepository
         {
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    public async Task<BlockedUser> BlockUserAsync(Guid blockerUserId, Guid targetUserId, string reason, CancellationToken cancellationToken = default)
+    {
+        var existing = await _dbContext.BlockedUsers
+            .FirstOrDefaultAsync(b => b.BlockerUserId == blockerUserId && b.BlockedTargetUserId == targetUserId, cancellationToken);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        var block = new BlockedUser
+        {
+            Id = Guid.NewGuid(),
+            BlockerUserId = blockerUserId,
+            BlockedTargetUserId = targetUserId,
+            Reason = reason,
+            CreatedAtUtc = DateTime.UtcNow
+        };
+
+        await _dbContext.BlockedUsers.AddAsync(block, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return block;
+    }
+
+    public async Task<bool> UnblockUserAsync(Guid blockerUserId, Guid targetUserId, CancellationToken cancellationToken = default)
+    {
+        var existing = await _dbContext.BlockedUsers
+            .FirstOrDefaultAsync(b => b.BlockerUserId == blockerUserId && b.BlockedTargetUserId == targetUserId, cancellationToken);
+
+        if (existing is null)
+        {
+            return false;
+        }
+
+        _dbContext.BlockedUsers.Remove(existing);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<IReadOnlyList<BlockedUser>> GetBlockedUsersAsync(Guid blockerUserId, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.BlockedUsers
+            .AsNoTracking()
+            .Where(b => b.BlockerUserId == blockerUserId)
+            .OrderByDescending(b => b.CreatedAtUtc)
+            .ToListAsync(cancellationToken);
     }
 }

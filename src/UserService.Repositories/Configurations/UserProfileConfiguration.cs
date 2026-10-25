@@ -26,6 +26,10 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
         builder.Property(x => x.StudentCode)
             .HasMaxLength(30);
 
+        builder.Property(x => x.Campus)
+            .HasMaxLength(50)
+            .HasDefaultValue("HCM");
+
         builder.Property(x => x.Major)
             .HasMaxLength(100);
 
@@ -49,5 +53,24 @@ public class UserProfileConfiguration : IEntityTypeConfiguration<UserProfile>
 
         builder.Property(x => x.PhoneNumber)
             .HasMaxLength(30);
+
+        builder.Property(x => x.GoogleCalendarUrl)
+            .HasMaxLength(500);
+    }
+}
+
+public class BlockedUserConfiguration : IEntityTypeConfiguration<BlockedUser>
+{
+    public void Configure(EntityTypeBuilder<BlockedUser> builder)
+    {
+        builder.ToTable("BlockedUsers");
+
+        builder.HasKey(x => x.Id);
+
+        builder.HasIndex(x => new { x.BlockerUserId, x.BlockedTargetUserId })
+            .IsUnique();
+
+        builder.Property(x => x.Reason)
+            .HasMaxLength(300);
     }
 }

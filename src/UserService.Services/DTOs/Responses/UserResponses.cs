@@ -33,6 +33,7 @@ public class UserProfileResponse
     public string Status { get; set; } = "Active";
     public bool EmailVerified { get; set; }
     public string StudentCode { get; set; } = string.Empty;
+    public string Campus { get; set; } = "HCM";
     public int? GraduationYear { get; set; }
     public string Major { get; set; } = string.Empty;
     public string CurrentCompany { get; set; } = string.Empty;
@@ -42,6 +43,20 @@ public class UserProfileResponse
     public string LinkedInUrl { get; set; } = string.Empty;
     public string GitHubUrl { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
+    public string GoogleCalendarUrl { get; set; } = string.Empty;
+    public bool ShowEmailPublicly { get; set; } = true;
+    public bool ShowPhonePublicly { get; set; } = false;
+    public bool ShowCompanyPublicly { get; set; } = true;
+    public bool ShowCalendarPublicly { get; set; } = true;
     public DateTime CreatedAtUtc { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
+}
+
+public class BlockedUserResponse
+{
+    public Guid Id { get; set; }
+    public Guid BlockerUserId { get; set; }
+    public Guid BlockedTargetUserId { get; set; }
+    public string Reason { get; set; } = string.Empty;
+    public DateTime CreatedAtUtc { get; set; }
 }

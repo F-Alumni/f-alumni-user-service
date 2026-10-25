@@ -22,6 +22,34 @@ namespace UserService.Repositories.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("UserService.Repositories.Entities.BlockedUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockedTargetUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BlockerUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlockerUserId", "BlockedTargetUserId")
+                        .IsUnique();
+
+                    b.ToTable("BlockedUsers", (string)null);
+                });
+
             modelBuilder.Entity("UserService.Repositories.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -167,6 +195,13 @@ namespace UserService.Repositories.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("Campus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("HCM");
+
                     b.Property<string>("CurrentCompany")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -181,6 +216,11 @@ namespace UserService.Repositories.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("GoogleCalendarUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("GraduationYear")
                         .HasColumnType("int");
@@ -204,6 +244,18 @@ namespace UserService.Repositories.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("ShowCalendarPublicly")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowCompanyPublicly")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowEmailPublicly")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ShowPhonePublicly")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Skills")
                         .IsRequired()

@@ -20,6 +20,9 @@ public class RegisterRequest
     [StringLength(30)]
     public string StudentCode { get; set; } = string.Empty;
 
+    [StringLength(50)]
+    public string Campus { get; set; } = "HCM";
+
     public int? GraduationYear { get; set; }
 
     [StringLength(100)]
@@ -53,10 +56,42 @@ public class LoginRequest
     public string Password { get; set; } = string.Empty;
 }
 
+public class GoogleLoginRequest
+{
+    /// <summary>
+    /// Google ID Token or mock Google credential token.
+    /// </summary>
+    public string IdToken { get; set; } = string.Empty;
+
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    public string FullName { get; set; } = string.Empty;
+
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    public string Campus { get; set; } = "HCM";
+}
+
 public class RefreshTokenRequest
 {
     [Required(ErrorMessage = "Refresh token is required.")]
     public string RefreshToken { get; set; } = string.Empty;
+}
+
+public class LogoutRequest
+{
+    public string? RefreshToken { get; set; }
+}
+
+public class ChangePasswordRequest
+{
+    [Required(ErrorMessage = "Current password is required.")]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "New password is required.")]
+    [StringLength(100, MinimumLength = 6)]
+    public string NewPassword { get; set; } = string.Empty;
 }
 
 public class ForgotPasswordRequest

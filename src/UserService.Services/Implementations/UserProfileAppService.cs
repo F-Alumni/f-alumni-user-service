@@ -25,12 +25,15 @@ public class UserProfileAppService : IUserProfileAppService
         _logger = logger;
     }
 
-    public async Task<UserProfileResponse> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<UserProfileResponse> GetByIdAsync(
+        Guid userId,
+        bool isOwnerOrAdmin = false,
+        CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
             ?? throw new NotFoundException(nameof(User), userId);
 
-        return user.ToResponse();
+        return user.ToResponse(applyPublicPrivacyMask: !isOwnerOrAdmin);
     }
 
     public async Task<UserProfileResponse> UpdateProfileAsync(
@@ -53,6 +56,17 @@ public class UserProfileAppService : IUserProfileAppService
         user.Profile.DisplayName = string.IsNullOrWhiteSpace(request.DisplayName)
             ? user.FullName
             : request.DisplayName.Trim();
+
+        if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
+        {
+            user.Profile.AvatarUrl = request.AvatarUrl.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Campus))
+        {
+            user.Profile.Campus = request.Campus.Trim();
+        }
+
         user.Profile.StudentCode = request.StudentCode.Trim();
         user.Profile.GraduationYear = request.GraduationYear;
         user.Profile.Major = request.Major.Trim();
@@ -63,6 +77,11 @@ public class UserProfileAppService : IUserProfileAppService
         user.Profile.LinkedInUrl = request.LinkedInUrl.Trim();
         user.Profile.GitHubUrl = request.GitHubUrl.Trim();
         user.Profile.PhoneNumber = request.PhoneNumber.Trim();
+
+        if (!string.IsNullOrWhiteSpace(request.GoogleCalendarUrl))
+        {
+            user.Profile.GoogleCalendarUrl = request.GoogleCalendarUrl.Trim();
+        }
 
         await _userRepository.UpdateAsync(user, cancellationToken);
 
@@ -94,8 +113,118 @@ public class UserProfileAppService : IUserProfileAppService
         return user.ToResponse();
     }
 
+    public async Task<UserProfileResponse> UpdateCalendarLinkAsync(
+        Guid userId,
+        UpdateCalendarLinkRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userId);
+
+        user.Profile ??= new UserProfile
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            DisplayName = user.FullName
+        };
+
+        user.Profile.GoogleCalendarUrl = request.GoogleCalendarUrl.Trim();
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        _logger.LogInformation("Updated Google Calendar link for user {UserId}", userId);
+        return user.ToResponse();
+    }
+
+    public async Task<UserProfileResponse> UpdatePrivacySettingsAsync(
+        Guid userId,
+        UpdatePrivacySettingsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), userId);
+
+        user.Profile ??= new UserProfile
+        {
+            Id = Guid.NewGuid(),
+            UserId = user.Id,
+            DisplayName = user.FullName
+        };
+
+        user.Profile.ShowEmailPublicly = request.ShowEmailPublicly;
+        user.Profile.ShowPhonePublicly = request.ShowPhonePublicly;
+        user.Profile.ShowCompanyPublicly = request.ShowCompanyPublicly;
+        user.Profile.ShowCalendarPublicly = request.ShowCalendarPublicly;
+
+        await _userRepository.UpdateAsync(user, cancellationToken);
+
+        _logger.LogInformation("Updated privacy settings for user {UserId}", userId);
+        return user.ToResponse();
+    }
+
+    public async Task<BlockedUserResponse> BlockUserAsync(
+        Guid blockerUserId,
+        Guid targetUserId,
+        BlockUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (blockerUserId == targetUserId)
+        {
+            throw new ArgumentException("You cannot block yourself.");
+        }
+
+        _ = await _userRepository.GetByIdAsync(targetUserId, cancellationToken)
+            ?? throw new NotFoundException(nameof(User), targetUserId);
+
+        var block = await _userRepository.BlockUserAsync(
+            blockerUserId,
+            targetUserId,
+            request?.Reason?.Trim() ?? string.Empty,
+            cancellationToken);
+
+        return new BlockedUserResponse
+        {
+            Id = block.Id,
+            BlockerUserId = block.BlockerUserId,
+            BlockedTargetUserId = block.BlockedTargetUserId,
+            Reason = block.Reason,
+            CreatedAtUtc = block.CreatedAtUtc
+        };
+    }
+
+    public async Task UnblockUserAsync(
+        Guid blockerUserId,
+        Guid targetUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var removed = await _userRepository.UnblockUserAsync(blockerUserId, targetUserId, cancellationToken);
+        if (!removed)
+        {
+            throw new NotFoundException("BlockedUser", targetUserId);
+        }
+    }
+
+    public async Task<IReadOnlyList<BlockedUserResponse>> GetBlockedUsersAsync(
+        Guid blockerUserId,
+        CancellationToken cancellationToken = default)
+    {
+        var list = await _userRepository.GetBlockedUsersAsync(blockerUserId, cancellationToken);
+        return list.Select(b => new BlockedUserResponse
+        {
+            Id = b.Id,
+            BlockerUserId = b.BlockerUserId,
+            BlockedTargetUserId = b.BlockedTargetUserId,
+            Reason = b.Reason,
+            CreatedAtUtc = b.CreatedAtUtc
+        }).ToList();
+    }
+
     public async Task<PagedResponse<UserProfileResponse>> GetDirectoryPagedAsync(
         string? search,
+        string? campus,
         int? graduationYear,
         string? major,
         string? company,
@@ -111,6 +240,7 @@ public class UserProfileAppService : IUserProfileAppService
 
         var (items, totalCount) = await _userRepository.GetDirectoryPagedAsync(
             search,
+            campus,
             graduationYear,
             major,
             company,
@@ -122,7 +252,7 @@ public class UserProfileAppService : IUserProfileAppService
 
         return new PagedResponse<UserProfileResponse>
         {
-            Items = items.Select(u => u.ToResponse()).ToList(),
+            Items = items.Select(u => u.ToResponse(applyPublicPrivacyMask: true)).ToList(),
             PageNumber = pageNumber,
             PageSize = pageSize,
             TotalCount = totalCount

@@ -11,8 +11,14 @@ public class UpdateUserProfileRequest
     [StringLength(150)]
     public string DisplayName { get; set; } = string.Empty;
 
+    [StringLength(500)]
+    public string AvatarUrl { get; set; } = string.Empty;
+
     [StringLength(30)]
     public string StudentCode { get; set; } = string.Empty;
+
+    [StringLength(50)]
+    public string Campus { get; set; } = "HCM";
 
     public int? GraduationYear { get; set; }
 
@@ -39,6 +45,9 @@ public class UpdateUserProfileRequest
 
     [StringLength(30)]
     public string PhoneNumber { get; set; } = string.Empty;
+
+    [StringLength(500)]
+    public string GoogleCalendarUrl { get; set; } = string.Empty;
 }
 
 public class UpdateAvatarRequest
@@ -46,6 +55,27 @@ public class UpdateAvatarRequest
     [Required(ErrorMessage = "Avatar URL is required.")]
     [StringLength(500)]
     public string AvatarUrl { get; set; } = string.Empty;
+}
+
+public class UpdateCalendarLinkRequest
+{
+    [Required(ErrorMessage = "Google Calendar URL is required.")]
+    [StringLength(500)]
+    public string GoogleCalendarUrl { get; set; } = string.Empty;
+}
+
+public class UpdatePrivacySettingsRequest
+{
+    public bool ShowEmailPublicly { get; set; } = true;
+    public bool ShowPhonePublicly { get; set; } = false;
+    public bool ShowCompanyPublicly { get; set; } = true;
+    public bool ShowCalendarPublicly { get; set; } = true;
+}
+
+public class BlockUserRequest
+{
+    [StringLength(300)]
+    public string Reason { get; set; } = string.Empty;
 }
 
 public class SuspendUserRequest
