@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net" modified="2026-10-28T06:45:00.000Z" agent="FPT-Alumni-BE1" version="24.0.0" type="device">
+  <diagram id="user-db-erd" name="FAlumni_User_Db ERD">
+    <mxGraphModel dx="1422" dy="798" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="950" math="0" shadow="1">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="ERD DATABASE — FPT ALUMNI USER SERVICE (FAlumni_User_Db) — BE1 Trương Chí Trung" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e293b;strokeColor=#3b82f6;fontColor=#ffffff;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="users" value="Users&#xa;----------------------------------------&#xa;PK  Id : uniqueidentifier NOT NULL&#xa;UK  Email : nvarchar(150) NOT NULL&#xa;    PasswordHash : nvarchar(500) NOT NULL&#xa;    FullName : nvarchar(150) NOT NULL&#xa;    Role : nvarchar(30) DEFAULT 'USER'&#xa;    AccountType : nvarchar(30) DEFAULT 'Alumni'&#xa;    Status : nvarchar(40) DEFAULT 'PendingVerification'&#xa;    EmailVerified : bit NOT NULL&#xa;    SuspensionReason : nvarchar(500) NULL&#xa;    CreatedAtUtc : datetime2 NOT NULL&#xa;    UpdatedAtUtc : datetime2 NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;fillColor=#0f172a;strokeColor=#2563eb;fontColor=#f8fafc;fontFamily=Courier New;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="430" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="profiles" value="UserProfiles (US-04..US-11)&#xa;--------------------------------------------------&#xa;PK     Id : uniqueidentifier NOT NULL&#xa;FK,UK  UserId : uniqueidentifier NOT NULL&#xa;       DisplayName : nvarchar(150) NOT NULL&#xa;       AvatarUrl : nvarchar(500) NOT NULL&#xa;       StudentCode : nvarchar(30) NOT NULL&#xa;IDX    Campus : nvarchar(50) DEFAULT 'HCM'&#xa;IDX    GraduationYear : int NULL&#xa;IDX    Major : nvarchar(100) NOT NULL&#xa;       CurrentCompany : nvarchar(150) NOT NULL&#xa;       JobTitle : nvarchar(150) NOT NULL&#xa;       Bio : nvarchar(1000) NOT NULL&#xa;       Skills : nvarchar(500) NOT NULL&#xa;       LinkedInUrl : nvarchar(300) NOT NULL&#xa;       GitHubUrl : nvarchar(300) NOT NULL&#xa;       PhoneNumber : nvarchar(30) NOT NULL&#xa;       GoogleCalendarUrl : nvarchar(500) [US-11]&#xa;       ShowEmailPublicly : bit NOT NULL [US-09]&#xa;       ShowPhonePublicly : bit NOT NULL [US-09]&#xa;       ShowCompanyPublicly : bit NOT NULL [US-09]&#xa;       ShowCalendarPublicly : bit NOT NULL [US-09]&#xa;       UpdatedAtUtc : datetime2 NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;fillColor=#0f172a;strokeColor=#10b981;fontColor=#f8fafc;fontFamily=Courier New;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="100" width="480" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="refresh" value="RefreshTokens&#xa;----------------------------------------&#xa;PK  Id : uniqueidentifier NOT NULL&#xa;FK  UserId : uniqueidentifier NOT NULL&#xa;UK  Token : nvarchar(250) NOT NULL&#xa;    ExpiresAtUtc : datetime2 NOT NULL&#xa;    IsRevoked : bit NOT NULL&#xa;    CreatedAtUtc : datetime2 NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;fillColor=#0f172a;strokeColor=#3b82f6;fontColor=#f8fafc;fontFamily=Courier New;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="450" width="380" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="verify" value="VerificationTokens&#xa;----------------------------------------&#xa;PK  Id : uniqueidentifier NOT NULL&#xa;FK  UserId : uniqueidentifier NOT NULL&#xa;    OtpCode : nvarchar(20) NOT NULL&#xa;    Purpose : nvarchar(40) DEFAULT 'EmailVerification'&#xa;    ExpiresAtUtc : datetime2 NOT NULL&#xa;    IsUsed : bit NOT NULL&#xa;    CreatedAtUtc : datetime2 NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;fillColor=#0f172a;strokeColor=#f59e0b;fontColor=#f8fafc;fontFamily=Courier New;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="450" width="380" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="blocks" value="BlockedUsers (US-10)&#xa;--------------------------------------------------&#xa;PK   Id : uniqueidentifier NOT NULL&#xa;UK1  BlockerUserId : uniqueidentifier NOT NULL&#xa;UK2  BlockedTargetUserId : uniqueidentifier NOT NULL&#xa;     Reason : nvarchar(300) NOT NULL&#xa;     CreatedAtUtc : datetime2 NOT NULL" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=12;spacingTop=10;fillColor=#0f172a;strokeColor=#f43f5e;fontColor=#f8fafc;fontFamily=Courier New;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="840" y="580" width="480" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="rel1" value="1 : 1 (FK_UserProfiles_Users_UserId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#10b981;strokeWidth=2;fontColor=#a7f3d0;" edge="1" parent="1" source="users" target="profiles">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel2" value="1 : N (FK_RefreshTokens_Users_UserId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3b82f6;strokeWidth=2;fontColor=#93c5fd;" edge="1" parent="1" source="users" target="refresh">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel3" value="1 : N (FK_VerificationTokens_Users_UserId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f59e0b;strokeWidth=2;fontColor=#fde68a;" edge="1" parent="1" source="users" target="verify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel4" value="1 : N (BlockerUserId / BlockedTargetUserId)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#f43f5e;strokeWidth=2;dashed=1;fontColor=#fecdd3;" edge="1" parent="1" source="users" target="blocks">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

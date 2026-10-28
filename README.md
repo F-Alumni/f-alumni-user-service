@@ -1,125 +1,47 @@
-﻿# 📦 Layered ASP.NET Core .NET 10 Service UserService
+# FPT Alumni Connect — User Service (`f-alumni-user-service`)
 
-> Mẫu khung dự án backend chuẩn dành cho các Microservices thuộc dự án **FPT Alumni Connect** (PRN232).
+Dịch vụ Quản lý Định danh, Xác thực JWT, Danh bạ Cựu sinh viên, Quyền riêng tư và gRPC Profile Server thuộc hệ thống **FPT Alumni Connect** (PRN232 Final Assignment). Được xây dựng theo chuẩn kiến trúc 3 tầng `.NET 10` (`Api -> Services -> Repositories`), gRPC Server (`UserProfileService`), và Kafka Producer (`user.registered.v1`).
+
+- **Owner**: Trương Chí Trung (`chstrg2208` — Backend 1)
+- **Database**: `FAlumni_User_Db` (Độc lập 100% — Zero Cross-Database Foreign Keys)
+- **Tài liệu ERD Database**: [`docs/ERD.md`](docs/ERD.md) | [`docs/architecture/f-alumni-user-db-erd.svg`](docs/architecture/f-alumni-user-db-erd.svg) | [`docs/architecture/f-alumni-user-db-erd.drawio`](docs/architecture/f-alumni-user-db-erd.drawio)
+- **Tài liệu Kiến trúc Hệ thống**: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ---
 
-## 🏛️ Cấu trúc Kiến trúc (Layered Architecture)
+## 🗄️ Sơ Đồ ERD Cơ Sở Dữ Liệu (`FAlumni_User_Db`)
 
-UserService áp dụng mô hình 3 tầng phân lớp rõ ràng:
+![ERD FAlumni_User_Db](docs/architecture/f-alumni-user-db-erd.svg)
 
-```text
-UserService.Api (REST API, Controllers, Middleware, Health, OpenAPI)
-    │
-    ▼ (Reference duy nhất)
-UserService.Services (Business Logic, Validation, DTOs, Exceptions)
-    │
-    ▼ (Reference duy nhất)
-UserService.Repositories (Data Access, EF Core SqlServer, Migrations, Entities)
+> Xem đặc tả chi tiết từng bảng, kiểu dữ liệu, khóa ngoại và chỉ mục tại [`docs/ERD.md`](docs/ERD.md).
+
+---
+
+## 🚀 Các User Stories Đã Hoàn Thành (Guideline & Google Sheet)
+
+| Mã US | Tính năng | Endpoint / Giao thức |
+| :--- | :--- | :--- |
+| **US-01** | Đăng ký tài khoản & Đăng nhập bằng Email / Mật khẩu | `POST /api/v1/auth/register`, `POST /api/v1/auth/login` |
+| **US-02** | Đăng nhập nhanh bằng Google OAuth / ID Token | `POST /api/v1/auth/google` |
+| **US-03** | Xác thực địa chỉ Email bằng mã OTP 6 chữ số + Phát sự kiện Kafka `user.registered.v1` | `POST /api/v1/auth/verify-email` |
+| **US-04** | Xem & Cập nhật hồ sơ cá nhân (`Campus`, `Major`, `GraduationYear`, `Bio`, `AvatarUrl`, `Skills`) | `GET /api/v1/users/me`, `PUT /api/v1/users/me` |
+| **US-05 / US-06** | Danh bạ Cựu sinh viên có phân trang & Lọc đa tiêu chí (`search`, `campus`, `major`, `graduationYear`) | `GET /api/v1/users`, `GET /api/v1/users/{id}` |
+| **US-07** | Đổi mật khẩu & Quên mật khẩu qua OTP | `POST /api/v1/auth/change-password`, `POST /api/v1/auth/forgot-password`, `POST /api/v1/auth/reset-password` |
+| **US-08** | Làm mới JWT Token & Đăng xuất (Thu hồi Refresh Token) | `POST /api/v1/auth/refresh-token`, `POST /api/v1/auth/logout` |
+| **US-09** | Cài đặt quyền riêng tư hiển thị hồ sơ công khai (`ShowEmail`, `ShowPhone`, `ShowCompany`, `ShowCalendar`) | `PUT /api/v1/users/me/privacy` |
+| **US-10** | Chặn & Bỏ chặn người dùng (`BlockedUsers`) | `GET /api/v1/users/me/blocks`, `POST /api/v1/users/{id}/block`, `DELETE /api/v1/users/{id}/block` |
+| **US-11** | Liên kết đặt lịch hẹn Google Calendar trên hồ sơ | Trường `GoogleCalendarUrl` trên `UserProfiles` |
+| **gRPC Server** | Cung cấp thông tin tóm tắt người dùng nội bộ cho `Chat Service` | `UserProfileGrpcService` (`contracts/grpc/user-profile/v1/user_profile.proto`) |
+| **AD-03 / AD-04** | Khóa / Mở khóa tài khoản & Phân quyền dành cho Admin Service | `POST /api/v1/users/{id}/suspend`, `POST /api/v1/users/{id}/unsuspend`, `PUT /api/v1/users/{id}/role` |
+
+---
+
+## 🛠️ Chạy Kiểm Thử & Xác Minh Hợp Đồng
+
+```powershell
+# 1. Xác minh tính toàn vẹn hợp đồng SHA-256
+.\scripts\verify-contracts.ps1
+
+# 2. Chạy toàn bộ Unit Test & Integration Test
+dotnet test UserService.sln --configuration Release
 ```
-
-> ⚠️ **Quy tắc bất di bất dịch**: `UserService.Api` không được reference hay inject bất kỳ Repository nào trực tiếp. Mọi truy vấn và nghiệp vụ phải đi qua tầng `UserService.Services`.
-
----
-
-## 🗄️ Cơ sở Dữ liệu & EF Core Migrations
-
-- **Provider**: Microsoft SQL Server (`Microsoft.EntityFrameworkCore.SqlServer`).
-- **Tên Database mặc định**: `FAlumni_UserService_Db` (trên instance `localhost\SQLEXPRESS` hoặc Docker SQL Server).
-- **Cấu hình chuỗi kết nối**: Trong `src/UserService.Api/appsettings.json`:
-  ```json
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=FAlumni_UserService_Db;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-  ```
-
-### Các lệnh EF Core thông dụng:
-
-```bash
-# 1. Liệt kê các migration hiện có
-dotnet ef migrations list --project src/UserService.Repositories --startup-project src/UserService.Api
-
-# 2. Tạo migration mới khi có thay đổi Entity/Fluent API
-dotnet ef migrations add <MigrationName> --project src/UserService.Repositories --startup-project src/UserService.Api
-
-# 3. Áp dụng migration vào SQL Server
-dotnet ef database update --project src/UserService.Repositories --startup-project src/UserService.Api
-
-# 4. Sinh file script SQL lũy đẳng để nộp bài hoặc triển khai
-dotnet ef migrations script --idempotent --output migrations.sql --project src/UserService.Repositories --startup-project src/UserService.Api
-```
-
----
-
-## 🚀 Hướng dẫn Sử dụng Nhanh (Quickstart)
-
-### 1. Khôi phục packages & Biên dịch dự án
-```bash
-# Khôi phục dependencies
-dotnet restore
-
-# Biên dịch toàn bộ Solution
-dotnet build
-```
-
-### 2. Chạy Kiểm thử (xUnit Unit & Integration Tests)
-```bash
-# 2.1 Chạy toàn bộ kiểm thử đơn vị & API integration với EF Core InMemory (36 tests passed)
-dotnet test
-
-# 2.2 Chạy thêm kiểm thử tích hợp thực tế với SQL Server (FptAlumni_Guideline_Test_Db) (43 tests passed)
-$env:RUN_SQLSERVER_TESTS = "true"
-dotnet test
-
-# 2.3 Chỉ chạy riêng các bài kiểm thử SQL Server Integration
-dotnet test --filter "Category=SqlServerIntegration"
-```
-
-### 3. Khởi chạy Web API cục bộ
-Trước khi khởi chạy, cần cung cấp khóa bí mật ký JWT (`Jwt:Key`). Nhằm tuân thủ bảo mật, khóa này **không được lưu cứng** trong `appsettings.json` và tuyệt đối **không tái sử dụng bất kỳ chuỗi khóa mẫu nào trong lịch sử Git** (các chuỗi đã commit phải coi là đã bị lộ).
-
-Hãy tự sinh một khóa bí mật ngẫu nhiên chuẩn mã hóa (256 bits / 32 bytes) thông qua một trong hai cách sau:
-- **Cách 1: Sinh ngẫu nhiên và gán biến môi trường (PowerShell)**:
-  ```powershell
-  $bytes = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); $randomKey = [Convert]::ToBase64String($bytes)
-  $env:Jwt__Key = $randomKey
-  dotnet run --project src/UserService.Api/UserService.Api.csproj
-  ```
-- **Cách 2: Sử dụng .NET User Secrets (khuyên dùng khi phát triển máy cá nhân)**:
-  ```powershell
-  dotnet user-secrets init --project src/UserService.Api
-  $bytes = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes); $randomKey = [Convert]::ToBase64String($bytes)
-  dotnet user-secrets set "Jwt:Key" $randomKey --project src/UserService.Api
-  dotnet run --project src/UserService.Api/UserService.Api.csproj
-  ```
-
-> 💡 **Lưu ý**: Khóa JWT phải có độ dài tối thiểu **32 bytes / 256 bits** (chuẩn HMAC-SHA256; chuỗi Base64 32 bytes có độ dài 44 ký tự đáp ứng hoàn hảo tiêu chuẩn này). Nếu thiếu hoặc quá ngắn, ứng dụng sẽ dừng ngay ở bước khởi động với thông báo lỗi rõ ràng. Đối với kiểm thử tự động (`dotnet test`), test fixture `CustomWebApplicationFactory` tự động nạp khóa kiểm thử giả lập độc lập mà không cần cấu hình thủ công.
-
-Mặc định ứng dụng sẽ lắng nghe trên cổng HTTP: `http://localhost:5000`.
-
----
-
-## 📡 Danh sách Endpoints Mẫu (Sample Endpoints)
-
-| Phương thức | Đường dẫn URL | Mô tả | Mã trạng thái HTTP |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | Kiểm tra tình trạng hoạt động (Health Check) | `200 OK` (`"Healthy"`) |
-| `GET` | `/api/v1/sample-items` | Lấy danh sách toàn bộ các items (Public) | `200 OK` (JSON List) |
-| `GET` | `/api/v1/sample-items/paged` | Lấy danh sách có phân trang (`pageNumber`, `pageSize`) và tìm kiếm | `200 OK` (`PagedResponse<T>`) |
-| `GET` | `/api/v1/sample-items/{id}` | Lấy chi tiết 1 item theo GUID (Public) | `200 OK` hoặc `404 Not Found` |
-| `POST` | `/api/v1/sample-items` | Tạo mới 1 sample item (USER/ADMIN role) | `201 Created` (Kèm Location header) |
-| `PUT` | `/api/v1/sample-items/{id}` | Cập nhật toàn bộ thông tin 1 item theo GUID (USER/ADMIN role) | `200 OK` hoặc `404 Not Found` |
-| `DELETE` | `/api/v1/sample-items/{id}` | Xóa 1 sample item theo GUID (ADMIN role) | `204 NoContent` hoặc `404 Not Found` |
-
----
-
-## 🛠️ Hướng dẫn Sao chép cho Service Mới
-
-Khi bắt đầu một service mới trong danh sách (`f-alumni-user-service`, `f-alumni-chat-service`, v.v.):
-
-1. Copy toàn bộ nội dung thư mục này vào thư mục repository của service.
-2. Đổi tên solution `UserService.sln` thành `FAlumni.<ServiceName>.sln`.
-3. Đổi tên các thư mục `src/UserService.*` thành `src/FAlumni.<ServiceName>.*`.
-4. Tìm và thay thế chuỗi `UserService` thành `FAlumni.<ServiceName>` trong tất cả các file `.csproj` và `.cs`.
-5. Cập nhật tên Database trong `appsettings.json` thành `FAlumni_<ServiceName>_Db` (xem [docs/05-database.md](file:///c:/Use/University/PRN232/ASM/guideline/docs/05-database.md)).
-6. Chạy `dotnet test` để đảm bảo hệ thống biên dịch và chạy kiểm thử thành công trước khi bắt đầu viết code nghiệp vụ.

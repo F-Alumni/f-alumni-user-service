@@ -80,94 +80,84 @@ flowchart TB
 
 ---
 
-## 3. Sơ Đồ ERD Của `User Service` & `Chat Service` (Zero Cross-DB Foreign Keys)
+## 3. Sơ Đồ ERD Của `User Service` (`FAlumni_User_Db`) — Zero Cross-DB Foreign Keys
+
+- **Tài liệu ERD chi tiết**: [docs/ERD.md](ERD.md)
+- **File Vector SVG**: [docs/architecture/f-alumni-user-db-erd.svg](architecture/f-alumni-user-db-erd.svg)
+- **File Draw.io**: [docs/architecture/f-alumni-user-db-erd.drawio](architecture/f-alumni-user-db-erd.drawio)
+
+![ERD FAlumni_User_Db](architecture/f-alumni-user-db-erd.svg)
 
 ```mermaid
 erDiagram
-    USERS ||--o{ REFRESH_TOKENS : "has"
-    USERS ||--o{ EMAIL_VERIFICATION_OTPS : "verifies"
-    USERS ||--o{ USER_BLOCKS : "blocks"
+    Users ||--|| UserProfiles : "1:1 (FK UserId, Cascade)"
+    Users ||--o{ RefreshTokens : "1:N (FK UserId, Cascade)"
+    Users ||--o{ VerificationTokens : "1:N (FK UserId, Cascade)"
+    Users ||--o{ BlockedUsers : "1:N (BlockerUserId / BlockedTargetUserId)"
 
-    USERS {
-        Guid Id PK
-        string Email UK
-        string PasswordHash
-        string FullName
-        string AvatarUrl
-        string Role "USER | ADMIN"
-        string Status "PendingVerification | Active | Suspended"
-        string Campus "FU-HCM | FU-HL | FU-DN | FU-CT | FU-QN"
-        string Major
+    Users {
+        uniqueidentifier Id PK
+        nvarchar_150 Email UK
+        nvarchar_500 PasswordHash
+        nvarchar_150 FullName
+        nvarchar_30 Role "USER | ADMIN"
+        nvarchar_30 AccountType "Student | Alumni | Admin"
+        nvarchar_40 Status "PendingVerification | Active | Suspended"
+        bit EmailVerified
+        nvarchar_500 SuspensionReason
+        datetime2 CreatedAtUtc
+        datetime2 UpdatedAtUtc
+    }
+
+    UserProfiles {
+        uniqueidentifier Id PK
+        uniqueidentifier UserId FK,UK
+        nvarchar_150 DisplayName
+        nvarchar_500 AvatarUrl
+        nvarchar_30 StudentCode
+        nvarchar_50 Campus "HCM | HN | DN | CT | QN"
         int GraduationYear
-        string CurrentCompany
-        string JobTitle
-        string GoogleCalendarUrl "US-11 External Calendar Link"
-        bool ShowEmail "US-09 Privacy"
-        bool ShowPhoneNumber "US-09 Privacy"
-        bool ShowCompany "US-09 Privacy"
-        bool ShowCalendarUrl "US-09 Privacy"
-        DateTime CreatedAtUtc
+        nvarchar_100 Major
+        nvarchar_150 CurrentCompany
+        nvarchar_150 JobTitle
+        nvarchar_1000 Bio
+        nvarchar_500 Skills
+        nvarchar_300 LinkedInUrl
+        nvarchar_300 GitHubUrl
+        nvarchar_30 PhoneNumber
+        nvarchar_500 GoogleCalendarUrl "US-11 Booking Link"
+        bit ShowEmailPublicly "US-09 Privacy"
+        bit ShowPhonePublicly "US-09 Privacy"
+        bit ShowCompanyPublicly "US-09 Privacy"
+        bit ShowCalendarPublicly "US-09 Privacy"
+        datetime2 UpdatedAtUtc
     }
 
-    REFRESH_TOKENS {
-        Guid Id PK
-        Guid UserId FK
-        string TokenHash UK
-        DateTime ExpiresAtUtc
-        bool IsRevoked
+    RefreshTokens {
+        uniqueidentifier Id PK
+        uniqueidentifier UserId FK
+        nvarchar_250 Token UK
+        datetime2 ExpiresAtUtc
+        bit IsRevoked
+        datetime2 CreatedAtUtc
     }
 
-    EMAIL_VERIFICATION_OTPS {
-        Guid Id PK
-        Guid UserId FK
-        string Email
-        string Code "6-digit OTP"
-        string Purpose "EmailVerification | PasswordReset"
-        DateTime ExpiresAtUtc
-        bool IsUsed
+    VerificationTokens {
+        uniqueidentifier Id PK
+        uniqueidentifier UserId FK
+        nvarchar_20 OtpCode "6-digit OTP"
+        nvarchar_40 Purpose "EmailVerification | PasswordReset"
+        datetime2 ExpiresAtUtc
+        bit IsUsed
+        datetime2 CreatedAtUtc
     }
 
-    USER_BLOCKS {
-        Guid Id PK
-        Guid BlockerUserId FK
-        Guid BlockedUserId "US-10 Blocked User"
-        DateTime CreatedAtUtc
-    }
-
-    CONVERSATIONS ||--o{ CONVERSATION_PARTICIPANTS : "contains"
-    CONVERSATIONS ||--o{ CHAT_MESSAGES : "has"
-
-    CONVERSATIONS {
-        Guid Id PK
-        string Title
-        bool IsGroup "1-1 or Group"
-        Guid CreatedByUserId "Scalar Guid (No Cross-DB FK)"
-        DateTime CreatedAtUtc
-        DateTime LastMessageAtUtc
-    }
-
-    CONVERSATION_PARTICIPANTS {
-        Guid Id PK
-        Guid ConversationId FK
-        Guid UserId "Scalar Guid -> Resolved via gRPC"
-        string DisplayName
-        string AvatarUrl
-        bool IsMuted "CH-09 Mute Notifications"
-        bool IsHidden "CH-09 Hide Conversation"
-        DateTime JoinedAtUtc
-        DateTime LastReadAtUtc
-    }
-
-    CHAT_MESSAGES {
-        Guid Id PK
-        Guid ConversationId FK
-        Guid SenderId "Scalar Guid (No Cross-DB FK)"
-        string Content
-        string AttachmentUrl "CH-07 Image/Attachment"
-        string AttachmentType "Image | File"
-        string Status "Sent | Delivered | Read (CH-05)"
-        DateTime CreatedAtUtc
-        DateTime ReadAtUtc
+    BlockedUsers {
+        uniqueidentifier Id PK
+        uniqueidentifier BlockerUserId UK
+        uniqueidentifier BlockedTargetUserId UK "US-10 Blocked User"
+        nvarchar_300 Reason
+        datetime2 CreatedAtUtc
     }
 ```
 
