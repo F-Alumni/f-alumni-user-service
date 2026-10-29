@@ -1,277 +1,107 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1360 920" width="100%" height="100%" font-family="Segoe UI, Inter, Arial, sans-serif">
-  <defs>
-    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0b1120"/>
-      <stop offset="100%" stop-color="#1e293b"/>
-    </linearGradient>
-    <linearGradient id="pkHeader" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#1d4ed8"/>
-      <stop offset="100%" stop-color="#2563eb"/>
-    </linearGradient>
-    <linearGradient id="profileHeader" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#047857"/>
-      <stop offset="100%" stop-color="#059669"/>
-    </linearGradient>
-    <linearGradient id="tokenHeader" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#b45309"/>
-      <stop offset="100%" stop-color="#d97706"/>
-    </linearGradient>
-    <linearGradient id="blockHeader" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#be123c"/>
-      <stop offset="100%" stop-color="#e11d48"/>
-    </linearGradient>
-    <filter id="cardShadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.45"/>
-    </filter>
-    <marker id="arrowOneToMany" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
-      <path d="M 0 2 L 10 6 L 0 10 z" fill="#60a5fa"/>
-    </marker>
-    <marker id="arrowOneToOne" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
-      <path d="M 0 2 L 10 6 L 0 10 z" fill="#34d399"/>
-    </marker>
-    <marker id="arrowBlock" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse">
-      <path d="M 0 2 L 10 6 L 0 10 z" fill="#fb7185"/>
-    </marker>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 860" width="100%" height="100%" font-family="Courier New, monospace">
+  <rect width="1120" height="860" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <text x="560" y="38" fill="#000000" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">ERD: FAlumni_User_Db (User Service)</text>
 
-  <!-- Background -->
-  <rect width="1360" height="920" fill="url(#bgGrad)"/>
+  <!-- Table 1: Users -->
+  <rect x="60" y="70" width="390" height="270" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="100" x2="450" y2="100" stroke="#000000" stroke-width="1.5"/>
+  <text x="255" y="90" fill="#000000" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">Users</text>
+  <text x="72" y="122" fill="#000000" font-size="12">+ PK  Id : uniqueidentifier NOT NULL</text>
+  <text x="72" y="142" fill="#000000" font-size="12">+ UK  Email : nvarchar(150) NOT NULL</text>
+  <text x="72" y="162" fill="#000000" font-size="12">+     PasswordHash : nvarchar(500) NOT NULL</text>
+  <text x="72" y="182" fill="#000000" font-size="12">+     FullName : nvarchar(150) NOT NULL</text>
+  <text x="72" y="202" fill="#000000" font-size="12">+     Role : nvarchar(30) NOT NULL</text>
+  <text x="72" y="222" fill="#000000" font-size="12">+     AccountType : nvarchar(30) NOT NULL</text>
+  <text x="72" y="242" fill="#000000" font-size="12">+     Status : nvarchar(40) NOT NULL</text>
+  <text x="72" y="262" fill="#000000" font-size="12">+     EmailVerified : bit NOT NULL</text>
+  <text x="72" y="282" fill="#000000" font-size="12">+     SuspensionReason : nvarchar(500) NULL</text>
+  <text x="72" y="302" fill="#000000" font-size="12">+     CreatedAtUtc : datetime2 NOT NULL</text>
+  <text x="72" y="322" fill="#000000" font-size="12">+     UpdatedAtUtc : datetime2 NOT NULL</text>
 
-  <!-- Title Banner -->
-  <rect x="30" y="24" width="1300" height="72" rx="12" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
-  <text x="55" y="56" fill="#f8fafc" font-size="22" font-weight="700">ERD DATABASE — FPT ALUMNI USER SERVICE (FAlumni_User_Db)</text>
-  <text x="55" y="80" fill="#94a3b8" font-size="13">Owner: BE1 (Trương Chí Trung - chstrg2208) • SQL Server + EF Core 10 • Isolated Microservice Database (Zero Cross-Service Foreign Keys)</text>
-  <rect x="1080" y="42" width="225" height="36" rx="18" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/>
-  <text x="1192" y="65" fill="#93c5fd" font-size="13" font-weight="600" text-anchor="middle">SQL Server : 5 Core Tables</text>
+  <!-- Table 2: UserProfiles -->
+  <rect x="620" y="70" width="440" height="460" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="620" y1="100" x2="1060" y2="100" stroke="#000000" stroke-width="1.5"/>
+  <text x="840" y="90" fill="#000000" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">UserProfiles</text>
+  <text x="632" y="122" fill="#000000" font-size="12">+ PK     Id : uniqueidentifier NOT NULL</text>
+  <text x="632" y="142" fill="#000000" font-size="12">+ FK,UK  UserId : uniqueidentifier NOT NULL</text>
+  <text x="632" y="162" fill="#000000" font-size="12">+        DisplayName : nvarchar(150) NOT NULL</text>
+  <text x="632" y="182" fill="#000000" font-size="12">+        AvatarUrl : nvarchar(500) NOT NULL</text>
+  <text x="632" y="202" fill="#000000" font-size="12">+        StudentCode : nvarchar(30) NOT NULL</text>
+  <text x="632" y="222" fill="#000000" font-size="12">+        Campus : nvarchar(50) NOT NULL</text>
+  <text x="632" y="242" fill="#000000" font-size="12">+        GraduationYear : int NULL</text>
+  <text x="632" y="262" fill="#000000" font-size="12">+        Major : nvarchar(100) NOT NULL</text>
+  <text x="632" y="282" fill="#000000" font-size="12">+        CurrentCompany : nvarchar(150) NOT NULL</text>
+  <text x="632" y="302" fill="#000000" font-size="12">+        JobTitle : nvarchar(150) NOT NULL</text>
+  <text x="632" y="322" fill="#000000" font-size="12">+        Bio : nvarchar(1000) NOT NULL</text>
+  <text x="632" y="342" fill="#000000" font-size="12">+        Skills : nvarchar(500) NOT NULL</text>
+  <text x="632" y="362" fill="#000000" font-size="12">+        LinkedInUrl : nvarchar(300) NOT NULL</text>
+  <text x="632" y="382" fill="#000000" font-size="12">+        GitHubUrl : nvarchar(300) NOT NULL</text>
+  <text x="632" y="402" fill="#000000" font-size="12">+        PhoneNumber : nvarchar(30) NOT NULL</text>
+  <text x="632" y="422" fill="#000000" font-size="12">+        GoogleCalendarUrl : nvarchar(500) NOT NULL</text>
+  <text x="632" y="442" fill="#000000" font-size="12">+        ShowEmailPublicly : bit NOT NULL</text>
+  <text x="632" y="462" fill="#000000" font-size="12">+        ShowPhonePublicly : bit NOT NULL</text>
+  <text x="632" y="482" fill="#000000" font-size="12">+        ShowCompanyPublicly : bit NOT NULL</text>
+  <text x="632" y="502" fill="#000000" font-size="12">+        ShowCalendarPublicly : bit NOT NULL</text>
+  <text x="632" y="520" fill="#000000" font-size="12">+        UpdatedAtUtc : datetime2 NOT NULL</text>
 
-  <!-- Relationship Connectors -->
-  <!-- Users (1) -> (1) UserProfiles -->
-  <path d="M 440 240 L 830 240" stroke="#34d399" stroke-width="2.5" fill="none" marker-end="url(#arrowOneToOne)"/>
-  <rect x="570" y="212" width="145" height="22" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
-  <text x="642" y="227" fill="#a7f3d0" font-size="11" font-weight="600" text-anchor="middle">1 : 1 (Cascade Delete)</text>
+  <!-- Table 3: RefreshTokens -->
+  <rect x="60" y="410" width="390" height="170" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="440" x2="450" y2="440" stroke="#000000" stroke-width="1.5"/>
+  <text x="255" y="430" fill="#000000" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">RefreshTokens</text>
+  <text x="72" y="462" fill="#000000" font-size="12">+ PK  Id : uniqueidentifier NOT NULL</text>
+  <text x="72" y="482" fill="#000000" font-size="12">+ FK  UserId : uniqueidentifier NOT NULL</text>
+  <text x="72" y="502" fill="#000000" font-size="12">+ UK  Token : nvarchar(250) NOT NULL</text>
+  <text x="72" y="522" fill="#000000" font-size="12">+     ExpiresAtUtc : datetime2 NOT NULL</text>
+  <text x="72" y="542" fill="#000000" font-size="12">+     IsRevoked : bit NOT NULL</text>
+  <text x="72" y="562" fill="#000000" font-size="12">+     CreatedAtUtc : datetime2 NOT NULL</text>
 
-  <!-- Users (1) -> (0..N) RefreshTokens -->
-  <path d="M 245 470 L 245 555" stroke="#60a5fa" stroke-width="2.5" fill="none" marker-end="url(#arrowOneToMany)"/>
-  <rect x="165" y="498" width="160" height="22" rx="6" fill="#1e3a8a" stroke="#3b82f6" stroke-width="1"/>
-  <text x="245" y="513" fill="#bfdbfe" font-size="11" font-weight="600" text-anchor="middle">1 : N (FK_RefreshTokens)</text>
+  <!-- Table 4: VerificationTokens -->
+  <rect x="60" y="630" width="390" height="190" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="60" y1="660" x2="450" y2="660" stroke="#000000" stroke-width="1.5"/>
+  <text x="255" y="650" fill="#000000" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">VerificationTokens</text>
+  <text x="72" y="682" fill="#000000" font-size="12">+ PK  Id : uniqueidentifier NOT NULL</text>
+  <text x="72" y="702" fill="#000000" font-size="12">+ FK  UserId : uniqueidentifier NOT NULL</text>
+  <text x="72" y="722" fill="#000000" font-size="12">+     OtpCode : nvarchar(20) NOT NULL</text>
+  <text x="72" y="742" fill="#000000" font-size="12">+     Purpose : nvarchar(40) NOT NULL</text>
+  <text x="72" y="762" fill="#000000" font-size="12">+     ExpiresAtUtc : datetime2 NOT NULL</text>
+  <text x="72" y="782" fill="#000000" font-size="12">+     IsUsed : bit NOT NULL</text>
+  <text x="72" y="802" fill="#000000" font-size="12">+     CreatedAtUtc : datetime2 NOT NULL</text>
 
-  <!-- Users (1) -> (0..N) VerificationTokens -->
-  <path d="M 440 360 L 580 360 L 580 555" stroke="#fbbf24" stroke-width="2.5" fill="none" marker-end="url(#arrowOneToMany)"/>
-  <rect x="492" y="465" width="176" height="22" rx="6" fill="#78350f" stroke="#f59e0b" stroke-width="1"/>
-  <text x="580" y="480" fill="#fde68a" font-size="11" font-weight="600" text-anchor="middle">1 : N (FK_VerificationTokens)</text>
+  <!-- Table 5: BlockedUsers -->
+  <rect x="620" y="600" width="440" height="160" fill="#ffffff" stroke="#000000" stroke-width="1.5"/>
+  <line x1="620" y1="630" x2="1060" y2="630" stroke="#000000" stroke-width="1.5"/>
+  <text x="840" y="620" fill="#000000" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">BlockedUsers</text>
+  <text x="632" y="652" fill="#000000" font-size="12">+ PK  Id : uniqueidentifier NOT NULL</text>
+  <text x="632" y="672" fill="#000000" font-size="12">+ FK  BlockerUserId : uniqueidentifier NOT NULL</text>
+  <text x="632" y="692" fill="#000000" font-size="12">+ FK  BlockedTargetUserId : uniqueidentifier NOT NULL</text>
+  <text x="632" y="712" fill="#000000" font-size="12">+     Reason : nvarchar(300) NOT NULL</text>
+  <text x="632" y="732" fill="#000000" font-size="12">+     CreatedAtUtc : datetime2 NOT NULL</text>
 
-  <!-- Users (1) -> (0..N) BlockedUsers -->
-  <path d="M 440 420 L 510 420 L 510 805 L 830 805" stroke="#fb7185" stroke-width="2" stroke-dasharray="6,4" fill="none" marker-end="url(#arrowBlock)"/>
-  <rect x="575" y="778" width="210" height="22" rx="6" fill="#881337" stroke="#f43f5e" stroke-width="1"/>
-  <text x="680" y="793" fill="#fecdd3" font-size="11" font-weight="600" text-anchor="middle">1 : N (BlockerUserId / TargetUserId)</text>
+  <!-- Black Relationships with Crow's Foot -->
+  <!-- Users (1) <-> (1) UserProfiles -->
+  <line x1="450" y1="140" x2="620" y2="140" stroke="#000000" stroke-width="1.5"/>
+  <line x1="462" y1="133" x2="462" y2="147" stroke="#000000" stroke-width="1.5"/>
+  <line x1="608" y1="133" x2="608" y2="147" stroke="#000000" stroke-width="1.5"/>
+  <text x="535" y="132" fill="#000000" font-family="Arial, sans-serif" font-size="11" text-anchor="middle">1 : 1</text>
 
-  <!-- ================= TABLE 1: Users ================= -->
-  <g filter="url(#cardShadow)">
-    <rect x="50" y="130" width="390" height="340" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="2"/>
-    <rect x="50" y="130" width="390" height="42" rx="10" fill="url(#pkHeader)"/>
-    <text x="70" y="157" fill="#ffffff" font-size="16" font-weight="700">Users</text>
-    <text x="420" y="156" fill="#dbeafe" font-size="12" font-weight="600" text-anchor="end">Core Identity</text>
+  <!-- Users (1) -> (N) RefreshTokens -->
+  <line x1="255" y1="340" x2="255" y2="410" stroke="#000000" stroke-width="1.5"/>
+  <line x1="248" y1="350" x2="262" y2="350" stroke="#000000" stroke-width="1.5"/>
+  <line x1="255" y1="396" x2="247" y2="410" stroke="#000000" stroke-width="1.5"/>
+  <line x1="255" y1="396" x2="263" y2="410" stroke="#000000" stroke-width="1.5"/>
+  <text x="278" y="380" fill="#000000" font-family="Arial, sans-serif" font-size="11">1 : N</text>
 
-    <!-- Columns -->
-    <g font-size="13" font-family="Consolas, monospace">
-      <text x="68" y="198" fill="#fbbf24" font-weight="700">PK</text>
-      <text x="110" y="198" fill="#f8fafc" font-weight="700">Id</text>
-      <text x="422" y="198" fill="#93c5fd" text-anchor="end">uniqueidentifier NOT NULL</text>
+  <!-- Users (1) -> (N) VerificationTokens -->
+  <polyline points="60,260 25,260 25,720 60,720" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="48" y1="253" x2="48" y2="267" stroke="#000000" stroke-width="1.5"/>
+  <line x1="46" y1="720" x2="60" y2="712" stroke="#000000" stroke-width="1.5"/>
+  <line x1="46" y1="720" x2="60" y2="728" stroke="#000000" stroke-width="1.5"/>
+  <text x="38" y="615" fill="#000000" font-family="Arial, sans-serif" font-size="11">1 : N</text>
 
-      <text x="68" y="224" fill="#38bdf8" font-weight="700">UK</text>
-      <text x="110" y="224" fill="#f8fafc">Email</text>
-      <text x="422" y="224" fill="#94a3b8" text-anchor="end">nvarchar(150) NOT NULL</text>
-
-      <text x="110" y="250" fill="#f8fafc">PasswordHash</text>
-      <text x="422" y="250" fill="#94a3b8" text-anchor="end">nvarchar(500) NOT NULL</text>
-
-      <text x="110" y="276" fill="#f8fafc">FullName</text>
-      <text x="422" y="276" fill="#94a3b8" text-anchor="end">nvarchar(150) NOT NULL</text>
-
-      <text x="110" y="302" fill="#f8fafc">Role</text>
-      <text x="422" y="302" fill="#94a3b8" text-anchor="end">nvarchar(30) ['USER'|'ADMIN']</text>
-
-      <text x="110" y="328" fill="#f8fafc">AccountType</text>
-      <text x="422" y="328" fill="#94a3b8" text-anchor="end">nvarchar(30) ['Alumni'|'Student']</text>
-
-      <text x="110" y="354" fill="#f8fafc">Status</text>
-      <text x="422" y="354" fill="#94a3b8" text-anchor="end">nvarchar(40) ['Active'|...]</text>
-
-      <text x="110" y="380" fill="#f8fafc">EmailVerified</text>
-      <text x="422" y="380" fill="#94a3b8" text-anchor="end">bit NOT NULL</text>
-
-      <text x="110" y="406" fill="#cbd5e1">SuspensionReason</text>
-      <text x="422" y="406" fill="#64748b" text-anchor="end">nvarchar(500) NULL</text>
-
-      <text x="110" y="432" fill="#f8fafc">CreatedAtUtc</text>
-      <text x="422" y="432" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-
-      <text x="110" y="456" fill="#f8fafc">UpdatedAtUtc</text>
-      <text x="422" y="456" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-    </g>
-  </g>
-
-  <!-- ================= TABLE 2: UserProfiles ================= -->
-  <g filter="url(#cardShadow)">
-    <rect x="830" y="130" width="480" height="545" rx="10" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
-    <rect x="830" y="130" width="480" height="42" rx="10" fill="url(#profileHeader)"/>
-    <text x="850" y="157" fill="#ffffff" font-size="16" font-weight="700">UserProfiles</text>
-    <text x="1290" y="156" fill="#d1fae5" font-size="12" font-weight="600" text-anchor="end">Alumni Directory &amp; Privacy (US-04..US-11)</text>
-
-    <g font-size="13" font-family="Consolas, monospace">
-      <text x="848" y="198" fill="#fbbf24" font-weight="700">PK</text>
-      <text x="900" y="198" fill="#f8fafc" font-weight="700">Id</text>
-      <text x="1292" y="198" fill="#6ee7b7" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="848" y="224" fill="#34d399" font-weight="700">FK,UK</text>
-      <text x="900" y="224" fill="#f8fafc" font-weight="700">UserId</text>
-      <text x="1292" y="224" fill="#6ee7b7" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="900" y="250" fill="#f8fafc">DisplayName</text>
-      <text x="1292" y="250" fill="#94a3b8" text-anchor="end">nvarchar(150) NOT NULL</text>
-
-      <text x="900" y="276" fill="#f8fafc">AvatarUrl</text>
-      <text x="1292" y="276" fill="#94a3b8" text-anchor="end">nvarchar(500) NOT NULL</text>
-
-      <text x="900" y="302" fill="#f8fafc">StudentCode</text>
-      <text x="1292" y="302" fill="#94a3b8" text-anchor="end">nvarchar(30) NOT NULL</text>
-
-      <text x="848" y="328" fill="#38bdf8" font-weight="700">IDX</text>
-      <text x="900" y="328" fill="#f8fafc">Campus</text>
-      <text x="1292" y="328" fill="#94a3b8" text-anchor="end">nvarchar(50) DEFAULT 'HCM'</text>
-
-      <text x="848" y="354" fill="#38bdf8" font-weight="700">IDX</text>
-      <text x="900" y="354" fill="#cbd5e1">GraduationYear</text>
-      <text x="1292" y="354" fill="#64748b" text-anchor="end">int NULL</text>
-
-      <text x="848" y="380" fill="#38bdf8" font-weight="700">IDX</text>
-      <text x="900" y="380" fill="#f8fafc">Major</text>
-      <text x="1292" y="380" fill="#94a3b8" text-anchor="end">nvarchar(100) NOT NULL</text>
-
-      <text x="900" y="406" fill="#f8fafc">CurrentCompany</text>
-      <text x="1292" y="406" fill="#94a3b8" text-anchor="end">nvarchar(150) NOT NULL</text>
-
-      <text x="900" y="432" fill="#f8fafc">JobTitle</text>
-      <text x="1292" y="432" fill="#94a3b8" text-anchor="end">nvarchar(150) NOT NULL</text>
-
-      <text x="900" y="458" fill="#f8fafc">Bio</text>
-      <text x="1292" y="458" fill="#94a3b8" text-anchor="end">nvarchar(1000) NOT NULL</text>
-
-      <text x="900" y="484" fill="#f8fafc">Skills</text>
-      <text x="1292" y="484" fill="#94a3b8" text-anchor="end">nvarchar(500) NOT NULL</text>
-
-      <text x="900" y="510" fill="#f8fafc">LinkedInUrl / GitHubUrl</text>
-      <text x="1292" y="510" fill="#94a3b8" text-anchor="end">nvarchar(300) NOT NULL</text>
-
-      <text x="900" y="536" fill="#f8fafc">PhoneNumber</text>
-      <text x="1292" y="536" fill="#94a3b8" text-anchor="end">nvarchar(30) NOT NULL</text>
-
-      <text x="900" y="562" fill="#f8fafc">GoogleCalendarUrl</text>
-      <text x="1292" y="562" fill="#94a3b8" text-anchor="end">nvarchar(500) [US-11]</text>
-
-      <text x="900" y="588" fill="#f8fafc">ShowEmailPublicly</text>
-      <text x="1292" y="588" fill="#94a3b8" text-anchor="end">bit NOT NULL [US-09]</text>
-
-      <text x="900" y="614" fill="#f8fafc">ShowPhone / Company / Calendar</text>
-      <text x="1292" y="614" fill="#94a3b8" text-anchor="end">bit NOT NULL [US-09]</text>
-
-      <text x="900" y="645" fill="#f8fafc">UpdatedAtUtc</text>
-      <text x="1292" y="645" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-    </g>
-  </g>
-
-  <!-- ================= TABLE 3: RefreshTokens ================= -->
-  <g filter="url(#cardShadow)">
-    <rect x="50" y="555" width="365" height="230" rx="10" fill="#0f172a" stroke="#60a5fa" stroke-width="2"/>
-    <rect x="50" y="555" width="365" height="42" rx="10" fill="url(#pkHeader)"/>
-    <text x="68" y="582" fill="#ffffff" font-size="16" font-weight="700">RefreshTokens</text>
-    <text x="398" y="581" fill="#dbeafe" font-size="12" font-weight="600" text-anchor="end">JWT Session &amp; Revocation</text>
-
-    <g font-size="13" font-family="Consolas, monospace">
-      <text x="68" y="624" fill="#fbbf24" font-weight="700">PK</text>
-      <text x="110" y="624" fill="#f8fafc" font-weight="700">Id</text>
-      <text x="398" y="624" fill="#93c5fd" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="68" y="652" fill="#60a5fa" font-weight="700">FK</text>
-      <text x="110" y="652" fill="#f8fafc" font-weight="700">UserId</text>
-      <text x="398" y="652" fill="#93c5fd" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="68" y="680" fill="#38bdf8" font-weight="700">UK</text>
-      <text x="110" y="680" fill="#f8fafc">Token</text>
-      <text x="398" y="680" fill="#94a3b8" text-anchor="end">nvarchar(250) NOT NULL</text>
-
-      <text x="110" y="708" fill="#f8fafc">ExpiresAtUtc</text>
-      <text x="398" y="708" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-
-      <text x="110" y="736" fill="#f8fafc">IsRevoked</text>
-      <text x="398" y="736" fill="#94a3b8" text-anchor="end">bit NOT NULL</text>
-
-      <text x="110" y="764" fill="#f8fafc">CreatedAtUtc</text>
-      <text x="398" y="764" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-    </g>
-  </g>
-
-  <!-- ================= TABLE 4: VerificationTokens ================= -->
-  <g filter="url(#cardShadow)">
-    <rect x="440" y="555" width="365" height="230" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
-    <rect x="440" y="555" width="365" height="42" rx="10" fill="url(#tokenHeader)"/>
-    <text x="458" y="582" fill="#ffffff" font-size="16" font-weight="700">VerificationTokens</text>
-    <text x="788" y="581" fill="#fef3c7" font-size="12" font-weight="600" text-anchor="end">Email OTP &amp; Password Reset</text>
-
-    <g font-size="13" font-family="Consolas, monospace">
-      <text x="458" y="624" fill="#fbbf24" font-weight="700">PK</text>
-      <text x="500" y="624" fill="#f8fafc" font-weight="700">Id</text>
-      <text x="788" y="624" fill="#fde68a" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="458" y="652" fill="#fbbf24" font-weight="700">FK</text>
-      <text x="500" y="652" fill="#f8fafc" font-weight="700">UserId</text>
-      <text x="788" y="652" fill="#fde68a" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="500" y="680" fill="#f8fafc">OtpCode</text>
-      <text x="788" y="680" fill="#94a3b8" text-anchor="end">nvarchar(20) NOT NULL</text>
-
-      <text x="500" y="708" fill="#f8fafc">Purpose</text>
-      <text x="788" y="708" fill="#94a3b8" text-anchor="end">nvarchar(40) ['EmailVerification']</text>
-
-      <text x="500" y="736" fill="#f8fafc">ExpiresAtUtc / IsUsed</text>
-      <text x="788" y="736" fill="#94a3b8" text-anchor="end">datetime2 / bit NOT NULL</text>
-
-      <text x="500" y="764" fill="#f8fafc">CreatedAtUtc</text>
-      <text x="788" y="764" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-    </g>
-  </g>
-
-  <!-- ================= TABLE 5: BlockedUsers ================= -->
-  <g filter="url(#cardShadow)">
-    <rect x="830" y="700" width="480" height="190" rx="10" fill="#0f172a" stroke="#f43f5e" stroke-width="2"/>
-    <rect x="830" y="700" width="480" height="42" rx="10" fill="url(#blockHeader)"/>
-    <text x="850" y="727" fill="#ffffff" font-size="16" font-weight="700">BlockedUsers</text>
-    <text x="1290" y="726" fill="#ffe4e6" font-size="12" font-weight="600" text-anchor="end">User Blocking Matrix (US-10)</text>
-
-    <g font-size="13" font-family="Consolas, monospace">
-      <text x="848" y="768" fill="#fbbf24" font-weight="700">PK</text>
-      <text x="900" y="768" fill="#f8fafc" font-weight="700">Id</text>
-      <text x="1292" y="768" fill="#fda4af" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="848" y="796" fill="#38bdf8" font-weight="700">UK1</text>
-      <text x="900" y="796" fill="#f8fafc" font-weight="700">BlockerUserId</text>
-      <text x="1292" y="796" fill="#fda4af" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="848" y="824" fill="#38bdf8" font-weight="700">UK2</text>
-      <text x="900" y="824" fill="#f8fafc" font-weight="700">BlockedTargetUserId</text>
-      <text x="1292" y="824" fill="#fda4af" text-anchor="end">uniqueidentifier NOT NULL</text>
-
-      <text x="900" y="852" fill="#f8fafc">Reason</text>
-      <text x="1292" y="852" fill="#94a3b8" text-anchor="end">nvarchar(300) NOT NULL</text>
-
-      <text x="900" y="878" fill="#f8fafc">CreatedAtUtc</text>
-      <text x="1292" y="878" fill="#94a3b8" text-anchor="end">datetime2 NOT NULL</text>
-    </g>
-  </g>
-
-  <!-- Legend Footer -->
-  <rect x="50" y="820" width="755" height="70" rx="10" fill="#1e293b" stroke="#334155" stroke-width="1"/>
-  <text x="70" y="846" fill="#f8fafc" font-size="13" font-weight="700">Ghi chú Kiến trúc Database (FAlumni_User_Db):</text>
-  <text x="70" y="868" fill="#cbd5e1" font-size="12">• PK: Primary Key (Guid) | FK: Foreign Key nội bộ (Cascade) | UK: Unique Index (Email, UserId, Token, Blocker+Target)</text>
-  <text x="70" y="884" fill="#93c5fd" font-size="12">• Cung cấp dữ liệu định danh sang Chat Service qua gRPC (user_profile.proto) và phát sự kiện Kafka (user.registered.v1).</text>
+  <!-- Users (1) -> (N) BlockedUsers -->
+  <polyline points="450,300 535,300 535,680 620,680" fill="none" stroke="#000000" stroke-width="1.5"/>
+  <line x1="462" y1="293" x2="462" y2="307" stroke="#000000" stroke-width="1.5"/>
+  <line x1="606" y1="680" x2="620" y2="672" stroke="#000000" stroke-width="1.5"/>
+  <line x1="606" y1="680" x2="620" y2="688" stroke="#000000" stroke-width="1.5"/>
+  <text x="562" y="670" fill="#000000" font-family="Arial, sans-serif" font-size="11">1 : N</text>
 </svg>
