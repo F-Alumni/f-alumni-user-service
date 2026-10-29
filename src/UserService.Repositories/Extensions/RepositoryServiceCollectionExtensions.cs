@@ -19,7 +19,10 @@ public static class RepositoryServiceCollectionExtensions
             ?? "Server=localhost\\SQLEXPRESS;Database=FAlumni_User_Db;Trusted_Connection=True;TrustServerCertificate=True;";
 
         var dbProvider = configuration?["DatabaseProvider"] ?? "SqlServer";
-        if (dbProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase))
+        var useInMemory = dbProvider.Equals("InMemory", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(configuration?["UseInMemoryDatabase"], "true", StringComparison.OrdinalIgnoreCase);
+
+        if (useInMemory)
         {
             services.AddDbContext<UserServiceDbContext>(options =>
             {
