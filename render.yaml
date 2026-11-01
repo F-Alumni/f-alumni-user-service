@@ -20,4 +20,4 @@ services:
       - key: Jwt__Audience
         value: falumni-services
       - key: Jwt__Key
-        generateValue: true
+        value: "falumni-production-shared-jwt-secret-key-2026-min-32-bytes"
