@@ -19,6 +19,7 @@ builder.Services.AddGrpc();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services.AddHttpClient();
 
 builder.Services.AddCors(options =>
 {
